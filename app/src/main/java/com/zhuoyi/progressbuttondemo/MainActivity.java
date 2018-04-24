@@ -35,18 +35,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void pause(View view){
-        mDownLoadProgressButton.setState(DownLoadProgressButton.PAUSE_STATE);
+        mDownLoadProgressButton.setState(DownLoadProgressButton.DOWNLOAD_PAUSE_STATE);
     }
 
     public void wait(View view){
-        mDownLoadProgressButton.setState(DownLoadProgressButton.WAITTING_STATE);
+        mDownLoadProgressButton.setState(DownLoadProgressButton.DOWNLOAD_WAITTING_STATE);
     }
 
     public void down(View view){
-        mDownLoadProgressButton.setState(DownLoadProgressButton.FREE_STATE);
+        mDownLoadProgressButton.setState(DownLoadProgressButton.DOWNLOAD_FREE_STATE);
     }
     public void install(View view){
-        mDownLoadProgressButton.setState(DownLoadProgressButton.DOWNLOAD_COMPLETE);
+        mDownLoadProgressButton.setState(DownLoadProgressButton.DOWNLOAD_COMPLETE_STATE);
     }
     public void progress(View view){
         mDownLoadProgressButton.setState(DownLoadProgressButton.DOWNLOADING_STATE);

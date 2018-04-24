@@ -20,27 +20,28 @@ import android.view.View;
 
 /**
  * Created by wubo on 2017/11/27.
- * 全新开发的下载进度按钮控件
  */
 
 public class DownLoadProgressButton extends View {
     /**
-     *  下载中的几种状态文字
-     * */
-    private final String FREE_STATE_STR ="下载";
-    private final String DOWNLOADING_STATE_STR ="暂停";
-    private final String PAUSE_STATE_STR ="继续";
-    private final String WAITTING_STATE_STR ="等待中";
-    private final String DOWNLOAD_COMPLETE_STR ="安装";
+     * download states (string)
+     */
+    private final String DOWNLOAD_FREE_STATE_STR = "下载";
+    private final String DOWNLOAD_STATE_STR = "暂停";
+    private final String DOWNLOAD_PAUSE_STATE_STR = "继续";
+    private final String DOWNLOAD_WAITTING_STATE_STR = "等待中";
+    private final String DOWNLOAD_COMPLETE_STR = "安装";
+    private final String DOWNLOAD_COMPLETE_OPEN_STR = "打开";
 
     /**
-     *  下载中状态
+     * downloading states (int)
      */
-    public static final int FREE_STATE=0;
-    public static final int DOWNLOADING_STATE=1;
-    public static final int PAUSE_STATE =2;
-    public static final int WAITTING_STATE=3;
-    public static final int DOWNLOAD_COMPLETE=4;
+    public static final int DOWNLOAD_FREE_STATE = 0;
+    public static final int DOWNLOADING_STATE = 1;
+    public static final int DOWNLOAD_PAUSE_STATE = 2;
+    public static final int DOWNLOAD_WAITTING_STATE = 3;
+    public static final int DOWNLOAD_COMPLETE_STATE = 4;
+    public static final int DOWNLOAD_COMPLETE_OPEN_STATE = 5;
     private RectF mDrawBgRectF;
 
     private Canvas mProgressCanvas;
@@ -48,16 +49,16 @@ public class DownLoadProgressButton extends View {
 
 
     /**
-     *  textSize类型是sp还是px
+     * sp or px
      */
-    public enum TextSizeType{
-        SP,PX
+    public enum TextSizeType {
+        SP, PX
     }
 
     /**
-     *  默认text size大小是sp
+     * default text size
      */
-    private final int DEFAULT_TEXT_SIZE=14;
+    private final int DEFAULT_TEXT_SIZE = 14;
 
     private int mMeasureWidth;
     private int mMeasureHeight;
@@ -65,57 +66,53 @@ public class DownLoadProgressButton extends View {
 
     private float mTextSize;
     /**
-     * 当前状态的text文字
-     * */
+     * text
+     */
     private String mStateTextCurrent;
     private Context mContext;
 
     /**
-     *  控件默认大小
-     * */
+     * default wright width and height
+     */
     private int mDefaultWidth;
     private int mDefaultHeight;
 
     /**
-     *  默认画笔
-     * */
-    private Paint mPaint=new Paint();
+     * paint
+     */
+    private Paint mPaint = new Paint();
 
     private Rect mTextBounds = new Rect();
 
-    private Path mPath=new Path();
+    private Path mPath = new Path();
     /**
-     * 控件边框以及进度条的颜色
+     * progress and border color
      */
     private int mProgressColor;
 
     /**
-     *  当前下载进度
-     * */
+     * current progress
+     */
     private float mProgressCurrent;
     /**
-     *  总下载进度
-     * */
+     * max progress
+     */
     private float mProgressMax;
 
 
-
-    /**
-     *  定义按钮圆角的弧度
-     */
     private int mCornerRadius;
 
     private int mBorderWidth;
 
     public DownLoadProgressButton(Context context) {
-        this(context,null);
+        this(context, null);
     }
-    /**
-     *  一般我们在布局中设置的控件会调用这个构造, attrs可以拿到我们设置的自定义attrs属性
-     */
+
+
     public DownLoadProgressButton(Context context, AttributeSet attrs) {
-        this(context, attrs,0);
+        this(context, attrs, 0);
     }
+
     public DownLoadProgressButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContext = context;
@@ -123,21 +120,21 @@ public class DownLoadProgressButton extends View {
     }
 
     /**
-     *  初始化默认参数
-     * */
+     * init default params
+     */
     private void initParams() {
-        mTextSize =sp2Px(DEFAULT_TEXT_SIZE);
-        mBorderWidth=dp2Px(1f);
+        mTextSize = sp2Px(DEFAULT_TEXT_SIZE);
+        mBorderWidth = dp2Px(1f);
         //默认空闲状态
-        mStateTextCurrent= FREE_STATE_STR;
+        mStateTextCurrent = DOWNLOAD_FREE_STATE_STR;
         //初始化圆角半径
-        mCornerRadius= dp2Px(10);
+        mCornerRadius = dp2Px(10);
         //默认进度条颜色
-        mProgressColor= Color.parseColor("#f87908");
+        mProgressColor = Color.parseColor("#f87908");
         initDefaultMeasureWidth();
         initPaint();
         //默认最大下载进度是100
-        mProgressMax=100;
+        mProgressMax = 100;
         //初始化进度条Bitmap
     }
 
@@ -149,58 +146,68 @@ public class DownLoadProgressButton extends View {
     private void initDefaultMeasureWidth() {
         mTextBounds.setEmpty();
         mPaint.setTextSize(mTextSize);
-        mPaint.getTextBounds(WAITTING_STATE_STR,0, WAITTING_STATE_STR.length(),mTextBounds);
+        mPaint.getTextBounds(mStateTextCurrent, 0, mStateTextCurrent.length(), mTextBounds);
 
         int textWidth = mTextBounds.width();
         int textHeight = mTextBounds.height();
 
         // 设置默认控件大小，默认宽高为字体宽高二倍
 
-        mDefaultWidth=textWidth*2;
-        mDefaultHeight=textHeight*2;
+        mDefaultWidth = textWidth * 2;
+        mDefaultHeight = textHeight * 2;
     }
 
 
-    private float sp2Px(float sp){
-       return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, mContext.getResources().getDisplayMetrics());
+    private float sp2Px(float sp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, mContext.getResources().getDisplayMetrics());
     }
 
-    private int dp2Px(float dp){
-        return (int) (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, dp, mContext.getResources().getDisplayMetrics())+0.5f);
+    private int dp2Px(float dp) {
+        return (int) (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, dp, mContext.getResources().getDisplayMetrics()) + 0.5f);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int widthSize=MeasureSpec.getSize(widthMeasureSpec);
-        int widthMode=MeasureSpec.getMode(widthMeasureSpec);
-        int heightSize=MeasureSpec.getSize(heightMeasureSpec);
-        int heightMode=MeasureSpec.getMode(heightMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        if(widthMode==MeasureSpec.EXACTLY){
-            mMeasureWidth=widthSize;
-        }else{
+        if (widthMode == MeasureSpec.EXACTLY) {
+            mMeasureWidth = widthSize;
+        } else {
             //非滚动这个种控件一般都是AT_MOST
-            mMeasureWidth=Math.min(mDefaultWidth,widthSize);
+            if(widthSize!=0){
+                mMeasureWidth = Math.min(mDefaultWidth, widthSize);
+            }else{
+                mMeasureWidth=mDefaultWidth;
+            }
+
         }
 
-        if(heightMode==MeasureSpec.EXACTLY){
-            mMeasureHeight=heightSize;
-        }else{
-            mMeasureHeight=Math.min(mDefaultHeight,heightSize);
+        if (heightMode == MeasureSpec.EXACTLY) {
+            mMeasureHeight = heightSize;
+        } else {
+            if(heightSize!=0){
+                mMeasureHeight = Math.min(mDefaultHeight, heightSize);
+            }else{
+                mMeasureHeight =mDefaultHeight;
+            }
+
         }
         mDrawBgRectF = new RectF(mBorderWidth, mBorderWidth, mMeasureWidth - mBorderWidth, mMeasureHeight - mBorderWidth);
 
         mProgressBitmap = Bitmap.createBitmap(mMeasureWidth - mBorderWidth, mMeasureHeight - mBorderWidth, Config.ARGB_4444);
 
         mProgressCanvas = new Canvas(mProgressBitmap);
-        setMeasuredDimension(mMeasureWidth,mMeasureHeight);
+        setMeasuredDimension(mMeasureWidth, mMeasureHeight);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-       //  1.绘制外围边框
+        //  1.绘制外围边框
         drawBorder(canvas);
         // 2.绘制进度条
         drawProgress(canvas);
@@ -213,11 +220,11 @@ public class DownLoadProgressButton extends View {
     private void drawProgressShadeText(Canvas canvas) {
         mPaint.setColor(Color.WHITE);
         FontMetricsInt fontMetricsInt = mPaint.getFontMetricsInt();
-        int tWidth =mTextBounds.width();
+        int tWidth = mTextBounds.width();
         float xCoordinate = (mMeasureWidth - tWidth) / 2;
-        float baseline  = (mMeasureHeight -fontMetricsInt.bottom+fontMetricsInt.top) / 2-fontMetricsInt.top;
-        float progressWidth = (mProgressCurrent / mProgressMax) *mMeasureWidth;
-        if(progressWidth > xCoordinate){
+        float baseline = (mMeasureHeight - fontMetricsInt.bottom + fontMetricsInt.top) / 2 - fontMetricsInt.top;
+        float progressWidth = (mProgressCurrent / mProgressMax) * mMeasureWidth;
+        if (progressWidth > xCoordinate) {
             canvas.save(Canvas.CLIP_SAVE_FLAG);
             float right = Math.min(progressWidth, xCoordinate + tWidth * 1.1f);
             canvas.clipRect(xCoordinate, 0, right, mMeasureHeight);
@@ -231,9 +238,9 @@ public class DownLoadProgressButton extends View {
         mPaint.setColor(mProgressColor);
         mPaint.getTextBounds(mStateTextCurrent, 0, mStateTextCurrent.length(), mTextBounds);
         FontMetricsInt fontMetricsInt = mPaint.getFontMetricsInt();
-        int tWidth =mTextBounds.width();
+        int tWidth = mTextBounds.width();
         float xCoordinate = (mMeasureWidth - tWidth) / 2;
-        float baseline  = (mMeasureHeight -fontMetricsInt.bottom+fontMetricsInt.top) / 2-fontMetricsInt.top;
+        float baseline = (mMeasureHeight - fontMetricsInt.bottom + fontMetricsInt.top) / 2 - fontMetricsInt.top;
         canvas.drawText(mStateTextCurrent, xCoordinate, baseline, mPaint);
     }
 
@@ -245,22 +252,22 @@ public class DownLoadProgressButton extends View {
         mProgressCanvas.save(Canvas.CLIP_SAVE_FLAG);
         float right = (mProgressCurrent / mProgressMax) * mMeasureWidth;
         mProgressCanvas.clipRect(0, 0, right, mMeasureHeight);
-        mProgressCanvas.drawColor(mProgressColor );
+        mProgressCanvas.drawColor(mProgressColor);
         mProgressCanvas.restore();
-        mPaint.setShader(new BitmapShader(mProgressBitmap, TileMode.CLAMP,TileMode.CLAMP));
-        canvas.drawRoundRect(mDrawBgRectF,mCornerRadius, mCornerRadius, mPaint);
+        mPaint.setShader(new BitmapShader(mProgressBitmap, TileMode.CLAMP, TileMode.CLAMP));
+        canvas.drawRoundRect(mDrawBgRectF, mCornerRadius, mCornerRadius, mPaint);
         mPaint.setShader(null);
 
     }
 
     /**
-     *  绘制边框
+     * draw the border
      */
     private void drawBorder(Canvas canvas) {
         mPaint.setStyle(Style.STROKE);
         mPaint.setColor(mProgressColor);
         mPaint.setStrokeWidth(dp2Px(0.5f));
-       // mPath.moveTo(mCornerRadius,0);
+        // mPath.moveTo(mCornerRadius,0);
    /*     mPath.moveTo(mCornerRadius,0);
         mPath.lineTo(mMeasureWidth-mCornerRadius,0);
         mPath.moveTo(mMeasureWidth-mCornerRadius,0);
@@ -278,77 +285,90 @@ public class DownLoadProgressButton extends View {
         mPath.moveTo(0,mCornerRadius);
         mPath.quadTo(0,0,mCornerRadius,0);
 */
-        canvas.drawRoundRect(mDrawBgRectF,mCornerRadius,mCornerRadius, mPaint);
+        canvas.drawRoundRect(mDrawBgRectF, mCornerRadius, mCornerRadius, mPaint);
     }
 
     /**
-     *   暴露的api提供下载、暂停、等待、继续、设置下载进度、设置最大下载进度等
+     * set progress
      */
 
-    public void setProgress(float progress){
-        if(progress>=mProgressMax){
-            mProgressCurrent=mProgressMax;
-        }else{
-            mProgressCurrent=progress;
+    public void setProgress(float progress) {
+        if (progress >= mProgressMax) {
+            mProgressCurrent = mProgressMax;
+        } else {
+            mProgressCurrent = progress;
         }
         invalidate();
     }
 
-    public void setMaxProgress(float progressMax){
-        mProgressMax=progressMax;
+    public void setMaxProgress(float progressMax) {
+        mProgressMax = progressMax;
     }
 
     /**
-     *  设置下载状态按钮显示,请设置默认提供的几种状态字段
-     *   public static final int FREE_STATE=0;         下载
-     *   public static final int DOWNLOADING_STATE=1;  暂停
-     *   public static final int PAUSE_STATE =2;       继续
-     *   public static final int WAITTING_STATE=3;     等待中状态
-     *   public static final int DOWNLOAD_COMPLETE=4;  下载完成等待安装
+     * set download button state
+     * public static final int DOWNLOAD_FREE_STATE=0;         下载
+     * public static final int DOWNLOADING_STATE=1;           暂停
+     * public static final int DOWNLOAD_PAUSE_STATE =2;       继续
+     * public static final int DOWNLOAD_WAITTING_STATE=3;     等待中状态
+     * public static final int DOWNLOAD_COMPLETE_STATE=4;     下载完成等待安装
      */
-    public void  setState(int downLoadState){
-        switch (downLoadState){
-            case FREE_STATE:
-                mStateTextCurrent=FREE_STATE_STR;
+    public void setState(int downLoadState) {
+        switch (downLoadState) {
+            case DOWNLOAD_FREE_STATE:
+                mStateTextCurrent = DOWNLOAD_FREE_STATE_STR;
                 break;
             case DOWNLOADING_STATE:
-                mStateTextCurrent=DOWNLOADING_STATE_STR;
+                mStateTextCurrent = DOWNLOAD_STATE_STR;
                 break;
-            case PAUSE_STATE:
-                mStateTextCurrent=PAUSE_STATE_STR;
+            case DOWNLOAD_PAUSE_STATE:
+                mStateTextCurrent = DOWNLOAD_PAUSE_STATE_STR;
                 break;
-            case WAITTING_STATE:
-                mStateTextCurrent=WAITTING_STATE_STR;
+            case DOWNLOAD_WAITTING_STATE:
+                mStateTextCurrent = DOWNLOAD_WAITTING_STATE_STR;
                 break;
-            case DOWNLOAD_COMPLETE:
-                mStateTextCurrent=DOWNLOAD_COMPLETE_STR;
+            case DOWNLOAD_COMPLETE_STATE:
+                mStateTextCurrent = DOWNLOAD_COMPLETE_STR;
+                break;
+            case DOWNLOAD_COMPLETE_OPEN_STATE:
+                mStateTextCurrent = DOWNLOAD_COMPLETE_OPEN_STR;
                 break;
         }
         invalidate();
     }
 
     /**
-     *   设置字体颜色
-     *   parms textSize:字体颜色大小
-     *         sizeType:字体大小类型是sp还是px
+     * set text color
+     * parms textSize:text size
+     * sizeType:type is sp or px?
      */
-    public void setTextSize(int textSize,TextSizeType sizeType){
-       if(sizeType==TextSizeType.SP){
-           mTextSize =sp2Px(textSize);
-       }else if(sizeType==TextSizeType.PX){
-           mTextSize=textSize;
-       }
+    public void setTextSize(int textSize, TextSizeType sizeType) {
+        if (sizeType == TextSizeType.SP) {
+            mTextSize = sp2Px(textSize);
+        } else if (sizeType == TextSizeType.PX) {
+            mTextSize = textSize;
+        }
         initDefaultMeasureWidth();
         requestLayout();
     }
 
 
-
     /**
-     *  设置边框圆角弧度大小
+     * set corner radius
      */
-    public void setCornerRadius(int radius){
-        mCornerRadius=radius;
+    public void setCornerRadius(int radius) {
+        mCornerRadius = radius;
         invalidate();
     }
+
+
+    /**
+     * set text
+     */
+    public void setText(String text) {
+        mStateTextCurrent = text;
+        initDefaultMeasureWidth();
+        requestLayout();
+    }
+
 }
